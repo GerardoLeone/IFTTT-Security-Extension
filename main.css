@@ -1,0 +1,60 @@
+
+body {
+    width: 250px;
+    height: auto;
+}
+
+#btn-on-off {
+    width: 90px;
+    height: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#msg-compact-list {
+    margin-top: 10px;
+}
+
+.list-group-item {
+    border: 1px solid rgba(0,0,0,0) !important;
+    background-color: #00000000 !important;
+    color: var(--fourth-color);
+}
+
+.divider {
+    height: 2px;
+    width: 80%;
+    background-color: var(--fourth-color);
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+/*
+    COLORS
+*/
+.first-color { 
+	background-color: var(--first-color); 
+}
+
+.second-color { 
+	background-color: var(--second-color); 
+}
+
+.third-color { 
+	background-color: var(--third-color); 
+}
+
+.text-color { 
+    color: var(--fourth-color);
+}
+
+:root {
+
+    --first-color: #233142;
+    --second-color: #455d7a;
+    --third-color: #f95959;
+    --fourth-color: #e3e3e3;
+
+}
