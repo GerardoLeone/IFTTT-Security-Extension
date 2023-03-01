@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "IFTTT Security Extension",
+  "description": "Estensione per la sicurezza sul sito IFTTT",
+  "version": "1.0",
+  "action": {
+    "default_popup": "main.html",
+    "default_icon": "iftttse.png"
+  }
+}
