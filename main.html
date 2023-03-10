@@ -9,23 +9,58 @@
     <link rel="stylesheet" href="main.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
   </head>
-  <body class="d-inline-flex flex-column first-color align-items-center">
-    <h4 class="text-center text-color">IFTTT Security Extension</h1>
+  <body class="d-inline-flex justify-content-center first-color">
+    <div class="d-inline-flex flex-column align-items-center" style="width: 80%;">
+      <h4 class="text-center text-color">IFTTT Security Extension</h1>
 
-    <img src="./icons/on-off-svgrepo-com.svg" id="btn-on-off">
+      <img src="./icons/on-off-ic.svg" id="btn-on-off">
 
-    <div class="divider"></div>
+      <div class="text-color align-self-end">Feedback</div>
+      <div class="divider"></div>
 
-    <ul class="list-group list-group-flush" id="msg-compact-list">
-      <li class="list-group-item">Nessun messaggio sulla sicurezza</li>
-      <li class="list-group-item">Dapibus ac facilisis in</li>
-      <li class="list-group-item">Morbi leo risus</li>
-    </ul>
+      <ul class="list-group list-group-flush" id="msg-compact-list">
+        <li class="list-group-item font-italic">Nessun messaggio sulla sicurezza.</li>
 
-    <!-- JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <li class="list-group-item" style="display: none;">
+          <div class="d-flex flex-row align-items-start">
+              <img src="./icons/expand-ic.svg" id="btn-expand">
+              <div class="text-color">Il campo email contiene dati sensibili.</div>
+          </div>
+        </li>
+
+        <li class="list-group-item" style="display: none;">
+          <div class="d-flex flex-row align-items-start">
+              <img src="./icons/expand-ic.svg" id="btn-expand">
+              <div class="text-color">Il campo password contiene dati sensibili.</div>
+          </div>
+        </li>
+
+        <li class="list-group-item" style="display: none;">
+          <div class="d-flex flex-row align-items-start">
+              <img src="./icons/expand-ic.svg" id="btn-expand">
+              <div class="text-color">Il campo mammt contiene dati sensibili.</div>
+          </div>
+        </li>
+
+        
+      </ul>
+
+      <div class="text-color align-self-end">Statistiche</div>
+      <div class="divider"></div>
+
+      <div class="d-flex flex-row justify-content-between" style="width: 100%;">
+        <div class="mt-2 mb-2 text-color">Regole rifiutate</div>
+        <div class="d-flex flex-row align-items-center">
+          <div class="text-color mr-1">0</div>
+          <img src="./icons/reset-ic.svg" id="btn-reset">
+        </div>
+      </div>
+
+      <!-- JavaScript -->
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    </div>
   </body>
 </html>
 <!--<html>

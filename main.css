@@ -11,19 +11,27 @@ body {
     margin-bottom: 10px;
 }
 
-#msg-compact-list {
-    margin-top: 10px;
+#btn-reset {
+    width: 17px;
+    height: auto;
+}
+
+#btn-expand {
+    width: 17px;
+    height: auto;
+    padding-top: 3px;
 }
 
 .list-group-item {
     border: 1px solid rgba(0,0,0,0) !important;
     background-color: #00000000 !important;
+    padding: .75rem 0rem !important;
     color: var(--fourth-color);
 }
 
 .divider {
     height: 2px;
-    width: 80%;
+    width: 100%;
     background-color: var(--fourth-color);
 }
 
