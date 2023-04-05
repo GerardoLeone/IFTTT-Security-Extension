@@ -1,6 +1,7 @@
 
 body {
-    width: 250px;
+    /*width: 250px; larghezza senza expand */
+    width: max-content;
     height: auto;
 }
 
@@ -33,6 +34,19 @@ body {
     height: 2px;
     width: 100%;
     background-color: var(--fourth-color);
+}
+
+.divider-vertical {
+    height: 90%;
+    width: 2px;
+    background-color: var(--fourth-color);
+}
+
+.main-content {
+    width: 80%; 
+    max-width: 250px; 
+    margin-right: 20px;
+    margin-left: 20px;
 }
 
 .align-items-center {
