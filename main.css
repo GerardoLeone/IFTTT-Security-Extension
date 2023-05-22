@@ -15,8 +15,23 @@ body {
     fill: var(--bs-danger);
 }
 
+#badge-notify {
+    top: 20%;
+    left: 75%;
+}
+
+#btn-notify {
+    width: 45px;
+    height: auto;
+    transition: filter 0.1s;
+}
+
+#btn-notify:hover {
+    filter: brightness(1.5)
+}
+
 #btn-on-off {
-    width: 90px;
+    width: 45px;
     height: auto;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -55,6 +70,7 @@ body {
     height: 90%;
     width: 2px;
     background-color: var(--fourth-color);
+    border-radius: 50px;
 }
 
 .main-content {
