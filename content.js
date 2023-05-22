@@ -1,25 +1,27 @@
 pageTitle = "None";
 
+triggerMap = {};
+actionMap = {};
+
 $(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titolo della pagina
     pageTitle = $(this).text()
-
-    //Ha senso? Non credo.
     switch(pageTitle)
     {
         case PAGE_TITLE_CREATE:
-
-            break;
-
-        case PAGE_TITLE_CHOOSE_SERVICE:
             
             break;
-
-        case PAGE_TITLE_CHOOSE_TRIGGER:
-        
+            
+            case PAGE_TITLE_CHOOSE_SERVICE:
+                
             break;
 
-        case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:
-        
+            case PAGE_TITLE_CHOOSE_TRIGGER:
+                
+                break;
+                    
+            case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:   
+            var elementiDinamici = $('[name^="fields["][name$="]"]');
+            console.log(elementiDinamici)
             break;
 
         case PAGE_TITLE_CHOOSE_ACTION:
@@ -27,26 +29,22 @@ $(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titol
             break;
 
         case PAGE_TITLE_COMPLETE_ACTION_FIELDS:
-        
+            // VIENE CHIAMATA MOLTE VOLTE, DA CAPIRE COME GESTIRE LA COSA
+            $(document).on("DOMSubtreeModified", '[name^="fields["][name$="]"]', function() {
+                var elementiDinamici = $('[name^="fields["][name$="]"]').toArray();
+                
+                console.log(elementiDinamici)
+            });
             break;
 
-        case PAGE_TITLE_REVIEW:
+        case PAGE_TITLE_REVIEW: //Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
 
-            $(document).on('click', '.preview__cta___mwtgs', 'button', function(event) {
-                //event.preventDefault();
-                // Altri codici da eseguire dopo aver chiamato preventDefault()
-                console.log('Debug')
-                event.preventDefault();
-  
-                $(this).remove();
+            $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
+                console.log($(this))
+                console.log($(this).text())
 
-                // Rimuovi temporaneamente l'attributo data-track-ifttt-next-event dal pulsante
-                //$(this).prop('data-track-ifttt-next-event', null);
-                //$(this).prop('data-track-data', null)
-                return false;
-
-            });
-
+                $(this).prop("disabled", true); //Impostare a true se la regola non è sicura.
+            })
             break;
     }
 });
