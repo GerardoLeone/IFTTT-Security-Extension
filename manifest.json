@@ -4,7 +4,7 @@
   "description": "Estensione per la sicurezza sul sito IFTTT",
   "version": "1.0",
   "permissions": [
-    "tabs", "scripting"
+    "tabs", "scripting", "storage", "notifications"
   ],
   "host_permissions": [
     "*://ifttt.com/*",
@@ -13,6 +13,9 @@
   "action": {
     "default_popup": "main-background.html",
     "default_icon": "iftttse.png"
+  },
+  "background": {
+    "service_worker": "data-manager.js"
   },
   "content_scripts": [
     {

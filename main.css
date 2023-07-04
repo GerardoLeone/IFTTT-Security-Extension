@@ -15,23 +15,8 @@ body {
     fill: var(--bs-danger);
 }
 
-#badge-notify {
-    top: 20%;
-    left: 75%;
-}
-
-#btn-notify {
-    width: 45px;
-    height: auto;
-    transition: filter 0.1s;
-}
-
-#btn-notify:hover {
-    filter: brightness(1.5)
-}
-
 #btn-on-off {
-    width: 45px;
+    width: 65px;
     height: auto;
     margin-top: 10px;
     margin-bottom: 10px;
@@ -58,6 +43,11 @@ body {
 #btn-reset {
     width: 17px;
     height: auto;
+    transition: transform 0.5s;
+}
+
+.rotate-360 {
+    transform: rotate(-360deg);
 }
 
 .divider {
@@ -74,10 +64,10 @@ body {
 }
 
 .main-content {
-    width: 80%; 
-    max-width: 250px; 
-    margin-right: 20px;
-    margin-left: 20px;
+    width: 83%;
+    max-width: 250px;
+    margin-right: 16px;
+    margin-left: 16px;
 }
 
 .align-items-center {
