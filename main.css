@@ -1,4 +1,3 @@
-
 body {
     /*width: 250px; larghezza senza expand */
     width: max-content;
@@ -44,6 +43,25 @@ body {
     width: 17px;
     height: auto;
     transition: transform 0.5s;
+}
+
+#rule-details {
+    height: 0px;
+    border-radius: 1rem;
+    transition: height 0.5s, opacity 0.5s;
+}
+
+#rule-details-text {
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.expanded {
+    height: 200px; 
+}
+
+.visible {
+    opacity: 1;
 }
 
 .rotate-360 {
