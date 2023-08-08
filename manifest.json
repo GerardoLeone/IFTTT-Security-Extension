@@ -7,8 +7,7 @@
     "tabs", "scripting", "storage", "notifications"
   ],
   "host_permissions": [
-    "*://ifttt.com/*",
-    "*://developer.chrome.com/*"
+    "<all_urls>"
   ],
   "action": {
     "default_popup": "main-background.html",

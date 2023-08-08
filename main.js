@@ -28,11 +28,16 @@ btnPower.click(function () {
         }
 
         //Se accendo/spengo il bottone, aggiorno l'estetica
-        chrome.storage.local.get('status', (response) => {
-            let power = !(response.status);
-            chrome.storage.local.set({status : power}, () => {
+        chrome.runtime.sendMessage({ action: 'getStatus'}, function(response) { //Prendo lo "status" tramite ServiceWorker dal database
+            let power = !(response);
+            console.log('getStatusMain: ' + power)
+            chrome.runtime.sendMessage({ 
+                action: 'setStatus',
+                status: power
+            }, function() {
+                console.log('Status response main')
                 updateBtnPowerStatus(power)
-            });
+            })
         })
     })
 });
@@ -77,7 +82,7 @@ function updateBtnPowerStatus(status)
         btnPower.addClass('btn-off');
         btnPower.removeClass('btn-on');
 
-        chrome.storage.local.set({ serverResponse: '' });
+        chrome.runtime.sendMessage({ action: "resetServerResponse"});
         $("#rule-alert").hide();
         $("#rule-no-alert").show();
     }
@@ -115,9 +120,9 @@ btnReset.click(function() {
 function resetRulesRejected()
 {
     //Imposto il contatore delle regole rifiutate a 0 e salvo in locale
-    chrome.storage.local.set({ rejectedRuleCounter: 0 }, () => {
+    chrome.runtime.sendMessage({ action: "resetRejectedRuleCounter" }, () => {
         $("#rules-rejected-counter").text(0)
-    });
+    })
 }
 
 /*
@@ -131,8 +136,8 @@ function updateRulesRejectedText()
         if(url === URL_CREATION)
         {
             //Sono nella pagina di creazione, allora aggiorno il serverResponse
-            chrome.storage.local.get('serverResponse', (response) => {
-                let responseText = response.serverResponse || ""; // Se l'intero non è ancora stato salvato, inizia da 0
+            chrome.runtime.sendMessage({action: "getServerResponse"}, (response) => {
+                let responseText = response || ""; // Se l'intero non è ancora stato salvato, inizia da 0
                 if(responseText.length > 0)
                 {
                     $("#rule-alert").show();
@@ -141,7 +146,7 @@ function updateRulesRejectedText()
                     $("#rule-alert").hide();
                     $("#rule-no-alert").show();
                 }
-            });
+            })
 
         } else {
             //Sono in una pagina esterna alla creazione, allora imposto il serverResponse dicendo che non ci sono problemi di sicurezza
@@ -151,14 +156,15 @@ function updateRulesRejectedText()
     });
 
     //Aggiorno il counter
-    chrome.storage.local.get('rejectedRuleCounter', (response) => {
-        let counter = response.rejectedRuleCounter || 0;
+    chrome.runtime.sendMessage({ action: "getRejectedRuleCounter"}, (response) => {
+        let counter = response || 0;
         $("#rules-rejected-counter").text(counter)
-    });
+    })
 
     //Aggiorno lo stato del bottone
-    chrome.storage.local.get('status', (response) => {
-        updateBtnPowerStatus(response.status)
+    chrome.runtime.sendMessage({ action: "getStatus"}, (response) => {
+        console.log('get status main update rules')
+        updateBtnPowerStatus(response)
     })
 }
 
