@@ -19,22 +19,45 @@ $(window).on('load', function() {
             {
                 $(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titolo della pagina
                     pageTitle = $(this).text()
-                    console.log(pageTitle)
+                    console.log("PAGE: " + pageTitle)
+                    
+                    if(pageTitle === PAGE_TITLE_REVIEW) { //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
+                        //TODO: un altro modo per prendere parametri è sicuramente quello di selezionarli uno a uno (per esempio usare il selettore "input, textarea, selection" ecc..)
 
+                        $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
+
+                            $(this).prop("disabled", true);
+                            $(this).hide();
+                            
+                            $(".preview__cta___mwtgs").html("<button class='button-primary' id='btn-finish'>Finish</button>")
+                        })
+                    }
+                })
+
+                $(document).on('click', 'form input[type="submit"][role="button"]', function() {
                     switch(pageTitle)
                     {
-                        case PAGE_TITLE_CREATE:
-                            
-                            break;
-                            
-                        case PAGE_TITLE_CHOOSE_SERVICE:
-                                
-                            break;
+                        case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:   
+                        case PAGE_TITLE_EDIT_TRIGGER_FIELDS:
+                            jsonOutput[MAP_KEY_TRIGGER] = fetchInputs();
+                            console.log('MAP_KEY_TRIGGER:')
+                            console.log(jsonOutput)
+                        break;
 
-                        case PAGE_TITLE_CHOOSE_TRIGGER:
-                            
-                            break;
-                                    
+                        case PAGE_TITLE_COMPLETE_ACTION_FIELDS:
+                        case PAGE_TITLE_EDIT_ACTION_FIEDLS:
+                            jsonOutput[MAP_KEY_ACTION] = fetchInputs();
+                            console.log('MAP_KEY_ACTION:')
+                            console.log(jsonOutput)
+                        break;                 
+                    }
+                })
+                /*$(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titolo della pagina
+                    pageTitle = $(this).text()
+                    console.log("PAGE: " + pageTitle)
+
+                    switch(pageTitle)
+                    {                                    
                         case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:   
                         case PAGE_TITLE_EDIT_TRIGGER_FIELDS:
                             $(document).on("click", 'form input[type="submit"][role="button"]', function() {
@@ -42,10 +65,7 @@ $(window).on('load', function() {
                                 console.log('MAP_KEY_TRIGGER:')
                                 console.log(jsonOutput)
                             });
-                            break;
-
-                        case PAGE_TITLE_CHOOSE_ACTION:
-                        
+                            console.log("PRIMA PAGE: " + pageTitle)
                             break;
 
                         case PAGE_TITLE_COMPLETE_ACTION_FIELDS:
@@ -55,6 +75,7 @@ $(window).on('load', function() {
                                 console.log('MAP_KEY_ACTION:')
                                 console.log(jsonOutput)
                             });
+                            console.log("SECONDA PAGE: " + pageTitle)
                             break;
 
                         case PAGE_TITLE_REVIEW: //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
@@ -69,7 +90,7 @@ $(window).on('load', function() {
                         })
                         break;
                     }
-                });
+                });*/
 
                 $(document).on('click', '#btn-finish', function(){ //se clicco sul pulsante di fine, mando il json al server esterno
 
@@ -138,8 +159,8 @@ function fetchInputs()
 
         // Aggiungere il valore dell'input alla lista corrispondente nel JSON
         jsonObj[label] = inputValues;
-        console.log('JSONOBJ: ')
-        console.log(jsonObj)
+        //console.log('JSONOBJ: ')
+        //console.log(jsonObj)
     });
     return jsonObj;
 }
