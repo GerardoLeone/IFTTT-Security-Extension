@@ -10,6 +10,7 @@ $(window).on('load', function() {
         chrome.runtime.sendMessage({ action: 'resetServerResponse' }); //al primo caricamento della pagina, resetto il messaggio sulla sicurezza
         chrome.runtime.sendMessage({ action: 'isBtnStatusOn'}, function(response) {
             let btnStatus = response
+            console.log("status: "+ btnStatus)
 
             pageTitle = "None";
 
@@ -17,22 +18,52 @@ $(window).on('load', function() {
 
             if(btnStatus) //Se il bottone è acceso
             {
-                $(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titolo della pagina
-                    pageTitle = $(this).text()
-                    console.log("PAGE: " + pageTitle)
-                    
-                    if(pageTitle === PAGE_TITLE_REVIEW) { //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
-                        //TODO: un altro modo per prendere parametri è sicuramente quello di selezionarli uno a uno (per esempio usare il selettore "input, textarea, selection" ecc..)
+                // Seleziona l'elemento header
+                const headerElement = $('header')[0];
 
-                        $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
+                // Crea un observer per rilevare l'aggiunta e le modifiche dei nodi
+                const observer = new MutationObserver(function(mutationsList, observer) {
+                    for (const mutation of mutationsList) {
+                        for (const addedNode of mutation.addedNodes) {
+                            // Verifica se l'elemento aggiunto è un h1
+                            if (addedNode.tagName === 'H1') {
+                                pageTitle = $(addedNode).text();
+                            }
+                        }
+                        
+                        // Verifica se il nodo modificato è un TextNode (cambio testo)
+                        if (mutation.type === 'characterData' && mutation.target.nodeType === Node.TEXT_NODE) {
+                            // Verifica se il nodo padre è un h1
+                            if (mutation.target.parentNode.tagName === 'H1') {
+                                pageTitle = $(mutation.target.parentNode).text();
 
-                            $(this).prop("disabled", true);
-                            $(this).hide();
-                            
-                            $(".preview__cta___mwtgs").html("<button class='button-primary' id='btn-finish'>Finish</button>")
-                        })
+                            }
+                        }
+
+                        if(pageTitle === PAGE_TITLE_REVIEW) { //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
+                            //TODO: un altro modo per prendere parametri è sicuramente quello di selezionarli uno a uno (per esempio usare il selettore "input, textarea, selection" ecc..)
+    
+                            $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
+    
+                                $(this).prop("disabled", true);
+                                $(this).hide();
+                                
+                                $(".preview__cta___mwtgs").html("<button class='button-primary' id='btn-finish'>Finish</button>")
+                            })
+                        }
+
                     }
-                })
+                });
+
+                // Configura l'observer per rilevare l'aggiunta e le modifiche dei nodi
+                const observerConfig = {
+                    childList: true,
+                    subtree: true,
+                    characterData: true, // Rileva le modifiche al testo dei nodi
+                };
+
+                // Avvia l'observer sull'elemento header
+                observer.observe(headerElement, observerConfig);
 
                 $(document).on('click', 'form input[type="submit"][role="button"]', function() {
                     switch(pageTitle)
