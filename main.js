@@ -1,8 +1,5 @@
 $(window).on('load', function() {
     updateRulesRejectedText()
-
-    //Reset rules details
-    $("#rule-details").hide()
 })
 
 /*
@@ -41,35 +38,6 @@ btnPower.click(function () {
         })
     })
 });
-
-/*
-    Funzionalità bottone "Perchè?"
-*/
-let btnDetails = $("#btn-details")
-btnDetails.click(function() {
-    //TODO Completare
-    let ruleDetails = $("#rule-details");
-    let height = ruleDetails.height();
-    let animationDuration = 500; // Durata dell'animazione in millisecondi
-
-    if (height === 0) {
-        // Non è espanso, esegui l'animazione per espandere il div
-        ruleDetails.animate({ height: ruleDetails[0].scrollHeight }, animationDuration, function() {
-            ruleDetails.height("auto");
-            btnDetails.text("Mostra meno");
-            $("#rule-details-text").addClass("visible");
-        });
-    } 
-    else
-    {
-        // È espanso, esegui l'animazione per contrarre il div
-        ruleDetails.animate({ height: 0 }, animationDuration, function() {
-            btnDetails.text("Perchè?");
-            $("#rule-details-text").removeClass("visible");
-        });
-    }
-
-})
 
 //Funzione per aggiornare estetica bottone
 function updateBtnPowerStatus(status)
