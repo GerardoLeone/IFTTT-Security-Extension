@@ -5,7 +5,8 @@
 */
 $(window).on('load', function() {
     let url = window.location.href;
-    if(url === 'https://ifttt.com/create')
+    console.log(url)
+    if(url === URL_CREATION)
     {
         chrome.runtime.sendMessage({ action: 'resetServerResponse' }); //al primo caricamento della pagina, resetto il messaggio sulla sicurezza
         chrome.runtime.sendMessage({ action: 'isBtnStatusOn'}, function(response) {
@@ -83,45 +84,6 @@ $(window).on('load', function() {
                         break;                 
                     }
                 })
-                /*$(document).on('DOMSubtreeModified', 'header h1', function() { //Rileva il titolo della pagina
-                    pageTitle = $(this).text()
-                    console.log("PAGE: " + pageTitle)
-
-                    switch(pageTitle)
-                    {                                    
-                        case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:   
-                        case PAGE_TITLE_EDIT_TRIGGER_FIELDS:
-                            $(document).on("click", 'form input[type="submit"][role="button"]', function() {
-                                jsonOutput[MAP_KEY_TRIGGER] = fetchInputs();
-                                console.log('MAP_KEY_TRIGGER:')
-                                console.log(jsonOutput)
-                            });
-                            console.log("PRIMA PAGE: " + pageTitle)
-                            break;
-
-                        case PAGE_TITLE_COMPLETE_ACTION_FIELDS:
-                        case PAGE_TITLE_EDIT_ACTION_FIEDLS:
-                            $(document).on("click", 'form input[type="submit"][role="button"]', function() {
-                                jsonOutput[MAP_KEY_ACTION] = fetchInputs();
-                                console.log('MAP_KEY_ACTION:')
-                                console.log(jsonOutput)
-                            });
-                            console.log("SECONDA PAGE: " + pageTitle)
-                            break;
-
-                        case PAGE_TITLE_REVIEW: //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
-                        //TODO: un altro modo per prendere parametri è sicuramente quello di selezionarli uno a uno (per esempio usare il selettore "input, textarea, selection" ecc..)
-
-                        $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
-
-                            $(this).prop("disabled", true);
-                            $(this).hide();
-                            
-                            $(".preview__cta___mwtgs").html("<button class='button-primary' id='btn-finish'>Finish</button>")
-                        })
-                        break;
-                    }
-                });*/
 
                 $(document).on('click', '#btn-finish', function(){ //se clicco sul pulsante di fine, mando il json al server esterno
 
@@ -157,13 +119,47 @@ $(window).on('load', function() {
             
                     let serverResponse  = "Ci sono problemi in questa regola perchè i parametri non sono sicuri e dovresti risolvere.";
                     chrome.runtime.sendMessage({ 
-                        action: 'saveData', 
+                        action: 'notifySecurityProblem', 
                         serverResponseMsg: serverResponse
                     });
             
                 })
             }
         })
+    } else if(url === URL_EXPLORE) {
+        var accountDropdown = $('.account-dropdown');
+
+        // Seleziona il div figlio con l'attributo "data-react-class" e "data-react-props" specifici
+        var targetDiv = accountDropdown.find('div[data-react-class="App.Comps.UnifiedProfileDropdown"]');
+
+        // Ottieni l'attributo "data-react-props"
+        var dataReactProps = targetDiv.attr('data-react-props');
+
+        // Decodifica la stringa JSON nell'oggetto JavaScript
+        var propsObject = JSON.parse(dataReactProps);
+
+        // Estrai l'email dall'oggetto propsObject
+        var email = propsObject.email; //TODO: rendere globale
+
+        console.log(email); // Stampa l'email nella console
+
+        //TODO: controllare che succede se non è loggato
+
+        chrome.storage.local.set({email: email}, () => {
+            
+            //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
+            chrome.storage.local.get("registeredPC", (response) => {
+                if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
+                {   
+                    let firebaseEmail = convertPointsToCommas(email);
+                    chrome.runtime.sendMessage({
+                        action: 'registerPC', //Verifico che l'email esista
+                        email: firebaseEmail
+                    })
+                }
+            })
+
+        });
     }
 
 });
@@ -212,3 +208,14 @@ const PAGE_TITLE_REVIEW = "Review and finish"
 const MAP_KEY_TRIGGER = "trigger"
 const MAP_KEY_ACTION = "action"
 const MAP_KEY_TITLE = "title"
+
+const URL_CREATION = "https://ifttt.com/create"
+const URL_EXPLORE = "https://ifttt.com/explore"
+
+function convertPointsToCommas(inputString) {
+    return inputString.replace(/\./g, ',');
+}
+
+function convertCommasToPoints(inputString) {
+    return inputString.replace(/,/g, '.');
+}

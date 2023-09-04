@@ -13,6 +13,7 @@ btnPower.click(function () {
 
     chrome.tabs.query({}, tabs => {
 
+        //Se sono nella pagina di creazione (login già effettuato quindi) non devo poter accendere/spegnere l'estensione
         for (var i = 0; i < tabs.length; i++) {
             var tab = tabs[i];
             // Controlla se l'URL della scheda corrente corrisponde all'URL specificato
@@ -27,13 +28,49 @@ btnPower.click(function () {
             }
         }
 
+        //Controllo tutte le schede aperte, se c'è la pagina explore la salvo
+        var tabId = -1;
+        for(var i = 0; i < tabs.length; i++) {
+            var tab = tabs[i];
+            if(tab.url === URL_EXPLORE) {
+                tabId = tab.id;
+                break;
+            }
+        }
+
         //Se accendo/spengo il bottone, aggiorno l'estetica
         chrome.storage.local.get('status', (response) => {
             let power = !(response.status);
             chrome.storage.local.set({status : power}, () => {
                 updateBtnPowerStatus(power)
+            })
+
+            if(power) //Creo una tab nell'url explore (fondamentale per la registrazione dell'email, vedi content.js)
+                chrome.tabs.create({ url: URL_EXPLORE, active: true });
+            else //Quando spengo l'estensione, salvo i dati nel DB
+                chrome.runtime.sendMessage({action: 'saveData'})
+
+        });
+
+    })
+});
+
+//TODO: testare\/
+/*
+    Quando si chiudono tutte le schede (chiusura browser o manuale) deve salvare i dati nel DB
+*/
+chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+    console.log('[ONREMOVED DEBUG] ENTRO')
+    chrome.storage.local.get('status', (response) => {
+        console.log('[ONREMOVED DEBUG] STATUS: ' + response.status)
+        if(response.status) { //Se è ON
+            chrome.tabs.query({ url: "https://ifttt.com/*" }, function(tabs) {
+                console.log('[ONREMOVED DEBUG] LENGTH: ' + tabs.length)
+                if (tabs.length === 0) {
+                    chrome.runtime.sendMessage({action: 'saveData'})
+                }
             });
-        })
+        }
     })
 });
 
@@ -118,6 +155,8 @@ function resetRulesRejected()
     chrome.storage.local.set({ rejectedRuleCounter: 0 }, () => {
         $("#rules-rejected-counter").text(0)
     });
+
+    chrome.storage.local.set({registeredPC: false})
 }
 
 /*
@@ -163,3 +202,4 @@ function updateRulesRejectedText()
 }
 
 const URL_CREATION = "https://ifttt.com/create"
+const URL_EXPLORE = "https://ifttt.com/explore"
