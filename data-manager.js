@@ -56,19 +56,7 @@ try {
         }
 
         else if(request.action === "saveData") {
-
-            //Prendo l'email registrata in locale
-            chrome.storage.local.get(['email', 'rejectedRuleCounter', 'status'], function(result) {
-                let email = result.email;
-                let firebaseEmail = convertPointsToCommas(email);
-                let rejectedRuleCounter = result.rejectedRuleCounter;
-                let btnStatus = result.status;
-
-                //ref.child(firebaseEmail).child('serverResponse').set(serverResponse)
-                ref.child(firebaseEmail).child('rejectedRuleCounter').set(rejectedRuleCounter)
-                ref.child(firebaseEmail).child('status').set(btnStatus);
-
-            })
+            saveData(request.email, request.rejectedRuleCounter);
             return true;
         }
 
@@ -106,3 +94,54 @@ function convertPointsToCommas(inputString) {
 function convertCommasToPoints(inputString) {
     return inputString.replace(/,/g, '.');
 }
+
+function saveData(email, rejectedRuleCounter)
+{
+    //Prendo l'email registrata in locale
+    /*chrome.storage.local.get(['email', 'rejectedRuleCounter', 'status'], function(result) {
+        let email = result.email;
+        let firebaseEmail = convertPointsToCommas(email);
+        let rejectedRuleCounter = result.rejectedRuleCounter;
+        let btnStatus = result.status;
+
+        //ref.child(firebaseEmail).child('serverResponse').set(serverResponse)
+        ref.child(firebaseEmail).child('rejectedRuleCounter').set(rejectedRuleCounter)
+        ref.child(firebaseEmail).child('status').set(btnStatus);
+
+    })*/
+
+    let firebaseEmail = convertPointsToCommas(email);
+    //ref.child(firebaseEmail).child('serverResponse').set(serverResponse)
+    ref.child(firebaseEmail).child('rejectedRuleCounter').set(rejectedRuleCounter)
+    
+}
+
+/*
+    Quando si chiudono tutte le schede (chiusura browser o manuale) deve salvare i dati nel DB
+*/
+chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
+    console.log('[ONREMOVED DEBUG] ENTRO')
+    chrome.storage.local.get('status', (response) => {
+        if (chrome.runtime.lastError) {
+            console.error('[ONREMOVED ERROR] Errore nell\'accesso ai dati di stato: ' + chrome.runtime.lastError);
+            return;
+        }
+        
+        console.log('[ONREMOVED DEBUG] STATUS: ' + response.status)
+        if (response.status) { // Se è ON
+            chrome.tabs.query({ url: "https://ifttt.com/*" }, function(tabs) {
+                if (chrome.runtime.lastError) {
+                    console.error('[ONREMOVED ERROR] Errore nell\'accesso alle schede: ' + chrome.runtime.lastError);
+                    return;
+                }
+                
+                console.log('[ONREMOVED DEBUG] LENGTH: ' + tabs.length)
+                if (tabs.length === 0) {
+                    chrome.storage.local.get(['email', 'rejectedRuleCounter'], function(result) {
+                        saveData(result.email, result.rejectedRuleCounter);
+                    });
+                }
+            });
+        }
+    });
+});

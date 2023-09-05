@@ -48,29 +48,18 @@ btnPower.click(function () {
             if(power) //Creo una tab nell'url explore (fondamentale per la registrazione dell'email, vedi content.js)
                 chrome.tabs.create({ url: URL_EXPLORE, active: true });
             else //Quando spengo l'estensione, salvo i dati nel DB
-                chrome.runtime.sendMessage({action: 'saveData'})
+            {
+                chrome.storage.local.get(['email', 'rejectedRuleCounter'], function(result) {
+                    chrome.runtime.sendMessage({
+                        action: 'saveData',
+                        email: result.email,
+                        rejectedRuleCounter: result.rejectedRuleCounter
+                    })
+                })
+            }
 
         });
 
-    })
-});
-
-//TODO: testare\/
-/*
-    Quando si chiudono tutte le schede (chiusura browser o manuale) deve salvare i dati nel DB
-*/
-chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
-    console.log('[ONREMOVED DEBUG] ENTRO')
-    chrome.storage.local.get('status', (response) => {
-        console.log('[ONREMOVED DEBUG] STATUS: ' + response.status)
-        if(response.status) { //Se è ON
-            chrome.tabs.query({ url: "https://ifttt.com/*" }, function(tabs) {
-                console.log('[ONREMOVED DEBUG] LENGTH: ' + tabs.length)
-                if (tabs.length === 0) {
-                    chrome.runtime.sendMessage({action: 'saveData'})
-                }
-            });
-        }
     })
 });
 
@@ -156,7 +145,7 @@ function resetRulesRejected()
         $("#rules-rejected-counter").text(0)
     });
 
-    chrome.storage.local.set({registeredPC: false})
+    chrome.storage.local.set({registeredPC: false}) //TODO verificare se è corretto inserirlo qui
 }
 
 /*

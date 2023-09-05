@@ -4,6 +4,7 @@
     e decidere se eseguire le azioni di check della sicurezza dei dati o meno.
 */
 $(window).on('load', function() {
+
     let url = window.location.href;
     console.log(url)
     if(url === URL_CREATION)
@@ -126,41 +127,72 @@ $(window).on('load', function() {
                 })
             }
         })
-    } else if(url === URL_EXPLORE) {
-        var accountDropdown = $('.account-dropdown');
-
-        // Seleziona il div figlio con l'attributo "data-react-class" e "data-react-props" specifici
-        var targetDiv = accountDropdown.find('div[data-react-class="App.Comps.UnifiedProfileDropdown"]');
-
-        // Ottieni l'attributo "data-react-props"
-        var dataReactProps = targetDiv.attr('data-react-props');
-
-        // Decodifica la stringa JSON nell'oggetto JavaScript
-        var propsObject = JSON.parse(dataReactProps);
-
-        // Estrai l'email dall'oggetto propsObject
-        var email = propsObject.email; //TODO: rendere globale
-
-        console.log(email); // Stampa l'email nella console
-
-        //TODO: controllare che succede se non è loggato
-
-        chrome.storage.local.set({email: email}, () => {
-            
-            //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
-            chrome.storage.local.get("registeredPC", (response) => {
-                if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
-                {   
-                    let firebaseEmail = convertPointsToCommas(email);
-                    chrome.runtime.sendMessage({
-                        action: 'registerPC', //Verifico che l'email esista
-                        email: firebaseEmail
-                    })
-                }
-            })
-
-        });
     }
+    else { //non sono in creazione
+
+        let signinLink = $("a.sign-in");
+
+        if(signinLink.length > 0) { //Se trova questo link, il login non è effettuato
+            chrome.storage.local.get("email", (response) => { //Verifico che l'email è ancora salvata in locale dopo il logout
+                let email = response.email
+                if(email.length > 0) {
+                    chrome.storage.local.get(['rejectedRuleCounter'], function(result) {
+                        chrome.runtime.sendMessage({
+                            action: 'saveData',
+                            email: email,
+                            rejectedRuleCounter: result.rejectedRuleCounter
+                        });
+                    });
+                }
+                chrome.storage.local.set({email: "", registeredPC: false, rejectedRuleCounter: 0, serverResponse: ""})
+            })
+        } else { //Login già effettuato
+
+            if(url === URL_EXPLORE) {
+
+                var accountDropdown = $('.account-dropdown');
+
+                // Seleziona il div figlio con l'attributo "data-react-class" e "data-react-props" specifici
+                var targetDiv = accountDropdown.find('div[data-react-class="App.Comps.UnifiedProfileDropdown"]');
+
+                // Ottieni l'attributo "data-react-props"
+                var dataReactProps = targetDiv.attr('data-react-props');
+
+                // Decodifica la stringa JSON nell'oggetto JavaScript
+                var propsObject = JSON.parse(dataReactProps);
+
+                // Estrai l'email dall'oggetto propsObject
+                var email = propsObject.email;
+
+                console.log(email); // Stampa l'email nella console
+
+                //TODO: controllare che succede se non è loggato
+
+                chrome.storage.local.set({email: email}, () => {
+                    
+                    //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
+                    chrome.storage.local.get("registeredPC", (response) => {
+                        if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
+                        {   
+                            let firebaseEmail = convertPointsToCommas(email);
+                            chrome.runtime.sendMessage({
+                                action: 'registerPC', //Verifico che l'email esista
+                                email: firebaseEmail
+                            })
+                        }
+                    })
+
+                });
+            }
+
+        }
+
+
+    }
+    /*else if(url === URL_LOGOUT) {
+        console.log('logout')   
+        chrome.storage.local.set({email: "", registeredPC: false, rejectedRuleCounter: 0, serverResponse: ""})
+    }*/
 
 });
 
@@ -211,6 +243,7 @@ const MAP_KEY_TITLE = "title"
 
 const URL_CREATION = "https://ifttt.com/create"
 const URL_EXPLORE = "https://ifttt.com/explore"
+const URL_LOGOUT = "https://ifttt.com/session/logout"
 
 function convertPointsToCommas(inputString) {
     return inputString.replace(/\./g, ',');
