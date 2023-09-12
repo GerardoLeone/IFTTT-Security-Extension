@@ -49,10 +49,11 @@ btnPower.click(function () {
                 chrome.tabs.create({ url: URL_EXPLORE, active: true });
             else //Quando spengo l'estensione, salvo i dati nel DB
             {
-                chrome.storage.local.get(['email', 'rejectedRuleCounter'], function(result) {
+                chrome.storage.local.get(['email', 'acceptedRuleCounter', 'rejectedRuleCounter'], function(result) {
                     chrome.runtime.sendMessage({
-                        action: 'saveData',
+                        action: 'saveRuleCounter',
                         email: result.email,
+                        acceptedRuleCounter: result.acceptedRuleCounter,
                         rejectedRuleCounter: result.rejectedRuleCounter
                     })
                 })

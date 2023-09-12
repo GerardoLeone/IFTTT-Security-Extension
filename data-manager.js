@@ -1,6 +1,6 @@
 importScripts('/firebase/firebase-app-compat.js');
 importScripts('/firebase/firebase-compat.js');
-importScripts('/firebase/firebase-database-compat.js');
+importScripts('/firebase/firebase-firestore-compat.js');
 
 try {
 
@@ -17,9 +17,7 @@ try {
 
     // Initialize Firebase
     const app = firebase.initializeApp(firebaseConfig);
-    const db = firebase.database(app);
-
-    var ref = db.ref(); //Riferimento al DB
+    var db = app.firestore();
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
@@ -55,30 +53,34 @@ try {
             return true;
         }
 
-        else if(request.action === "saveData") {
-            saveData(request.email, request.rejectedRuleCounter);
+        else if(request.action === "saveRule") {
+            saveRule(email, request.title, request.trigger, request.action)
+            return true;
+        }
+
+        else if(request.action === "saveRuleCounter") {
+            saveRuleCounter(request.email, request.acceptedRuleCounter, request.rejectedRuleCounter);
             return true;
         }
 
         else if(request.action === "registerPC") {
 
-            console.log("EMAIL DEBUG: "+ request.email)
-            ref.child(request.email).once("value")
-            .then((snapshot) => {
-                console.log("EXISTS DEBUG: " + snapshot.exists());
-                if (snapshot.exists()) { //L'email esiste
+            db.collection(request.email)
+              .get()
+              .then((snapshot) => {
+                if(snapshot.exists) { //L'email esiste
                     //Scrivo i dati dal DB in locale
-                    const emailData = snapshot.val(); // Ottieni l'oggetto dati dell'email
-                    const status = emailData.status;
-                    const rejectedRuleCounter = emailData.rejectedRuleCounter;
+                    const ruleData = snapshot.data().rules;
+                    const acceptedRuleCounter = ruleData.accepted;
+                    const rejectedRuleCounter = ruleData.rejected;
 
                     chrome.storage.local.set({
-                        status: status,
+                        acceptedRuleCounter: acceptedRuleCounter,
                         rejectedRuleCounter: rejectedRuleCounter
                     })
                 }
-            })
 
+            })
             chrome.storage.local.set({registeredPC: true});
             return true;
         }
@@ -87,33 +89,33 @@ try {
     console.log(e);
 }
 
-function convertPointsToCommas(inputString) {
-    return inputString.replace(/\./g, ',');
-}
-
-function convertCommasToPoints(inputString) {
-    return inputString.replace(/,/g, '.');
-}
-
-function saveData(email, rejectedRuleCounter)
+function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 {
-    //Prendo l'email registrata in locale
-    /*chrome.storage.local.get(['email', 'rejectedRuleCounter', 'status'], function(result) {
-        let email = result.email;
-        let firebaseEmail = convertPointsToCommas(email);
-        let rejectedRuleCounter = result.rejectedRuleCounter;
-        let btnStatus = result.status;
+    db.collection(email)
+      .doc("rules")
+      .update({
+        accepted: acceptedRuleCounter,  
+        rejected: rejectedRuleCounter
+      })
+}
 
-        //ref.child(firebaseEmail).child('serverResponse').set(serverResponse)
-        ref.child(firebaseEmail).child('rejectedRuleCounter').set(rejectedRuleCounter)
-        ref.child(firebaseEmail).child('status').set(btnStatus);
+function saveRule(email, title, trigger, action)
+{
+    chrome.storage.local.get(['acceptedRuleCounter', 'rejectedRuleCounter'], (response) => {
+        let newRuleId = (response.acceptedRuleCounter)+1;
 
-    })*/
+        db.collection(email)
+          .doc("regola"+newRuleId)
+          .update({
+            title: title,
+            trigger: trigger,
+            action: action
+          })
 
-    let firebaseEmail = convertPointsToCommas(email);
-    //ref.child(firebaseEmail).child('serverResponse').set(serverResponse)
-    ref.child(firebaseEmail).child('rejectedRuleCounter').set(rejectedRuleCounter)
-    
+        chrome.storage.local.set({acceptedRuleCounter: newRuleId})
+
+        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter)
+    })
 }
 
 /*
@@ -137,8 +139,8 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
                 
                 console.log('[ONREMOVED DEBUG] LENGTH: ' + tabs.length)
                 if (tabs.length === 0) {
-                    chrome.storage.local.get(['email', 'rejectedRuleCounter'], function(result) {
-                        saveData(result.email, result.rejectedRuleCounter);
+                    chrome.storage.local.get(['email', 'acceptedRuleCounter', 'rejectedRuleCounter'], function(result) {
+                        saveRuleCounter(result.email, result.acceptedRuleCounter, result.rejectedRuleCounter);
                     });
                 }
             });

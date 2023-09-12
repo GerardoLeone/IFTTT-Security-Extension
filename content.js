@@ -91,8 +91,22 @@ $(window).on('load', function() {
                     //Prendo alla fine il titolo
                     jsonOutput[MAP_KEY_TITLE] = $("div.growing-text-area div").text()
             
-
                     console.log(jsonOutput)
+
+                    //Va a buon fine
+                    chrome.storage.local.get("email", (response) => {
+                        let email = response.email
+                        chrome.runtime.sendMessage({
+                            action: 'saveRule',
+                            email: email,
+                            title: JSON.stringify(jsonOutput[MAP_KEY_TITLE]),
+                            trigger: JSON.stringify(jsonOutput[MAP_KEY_TRIGGER]),
+                            action: JSON.stringify(jsonOutput[MAP_KEY_ACTION])
+                        })
+                    })
+
+//=====================================================================================================================================================
+
                     /*$.ajax({
                         url: 'external-server-url',
                         type: 'POST',
@@ -115,7 +129,7 @@ $(window).on('load', function() {
                     $(".preview__cta___mwtgs button").click()
                     
                     */
-            
+                    /*
                     //Se la regola non è sicura (dunque il server mi passa una stringa con i problemi):
             
                     let serverResponse  = "Ci sono problemi in questa regola perchè i parametri non sono sicuri e dovresti risolvere.";
@@ -123,7 +137,7 @@ $(window).on('load', function() {
                         action: 'notifySecurityProblem', 
                         serverResponseMsg: serverResponse
                     });
-            
+                    */
                 })
             }
         })
@@ -136,15 +150,16 @@ $(window).on('load', function() {
             chrome.storage.local.get("email", (response) => { //Verifico che l'email è ancora salvata in locale dopo il logout
                 let email = response.email
                 if(email.length > 0) {
-                    chrome.storage.local.get(['rejectedRuleCounter'], function(result) {
+                    chrome.storage.local.get(['acceptedRuleCounter', 'rejectedRuleCounter'], function(result) {
                         chrome.runtime.sendMessage({
-                            action: 'saveData',
+                            action: 'saveRuleCounter',
                             email: email,
+                            acceptedRuleCounter: result.acceptedRuleCounter,
                             rejectedRuleCounter: result.rejectedRuleCounter
                         });
                     });
                 }
-                chrome.storage.local.set({email: "", registeredPC: false, rejectedRuleCounter: 0, serverResponse: ""})
+                chrome.storage.local.set({email: "", registeredPC: false, rejectedRuleCounter: 0, acceptedRuleCounter: 0, serverResponse: ""})
             })
         } else { //Login già effettuato
 
@@ -173,11 +188,10 @@ $(window).on('load', function() {
                     //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
                     chrome.storage.local.get("registeredPC", (response) => {
                         if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
-                        {   
-                            let firebaseEmail = convertPointsToCommas(email);
+                        {  
                             chrome.runtime.sendMessage({
                                 action: 'registerPC', //Verifico che l'email esista
-                                email: firebaseEmail
+                                email: email
                             })
                         }
                     })
@@ -244,11 +258,3 @@ const MAP_KEY_TITLE = "title"
 const URL_CREATION = "https://ifttt.com/create"
 const URL_EXPLORE = "https://ifttt.com/explore"
 const URL_LOGOUT = "https://ifttt.com/session/logout"
-
-function convertPointsToCommas(inputString) {
-    return inputString.replace(/\./g, ',');
-}
-
-function convertCommasToPoints(inputString) {
-    return inputString.replace(/,/g, '.');
-}
