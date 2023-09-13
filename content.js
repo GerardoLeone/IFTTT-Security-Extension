@@ -90,18 +90,16 @@ $(window).on('load', function() {
 
                     //Prendo alla fine il titolo
                     jsonOutput[MAP_KEY_TITLE] = $("div.growing-text-area div").text()
-            
                     console.log(jsonOutput)
 
                     //Va a buon fine
                     chrome.storage.local.get("email", (response) => {
                         let email = response.email
+                        console.log('[ADDRULE] email: ' + email)
                         chrome.runtime.sendMessage({
                             action: 'saveRule',
                             email: email,
-                            title: JSON.stringify(jsonOutput[MAP_KEY_TITLE]),
-                            trigger: JSON.stringify(jsonOutput[MAP_KEY_TRIGGER]),
-                            action: JSON.stringify(jsonOutput[MAP_KEY_ACTION])
+                            jsonOutput: jsonOutput
                         })
                     })
 
@@ -184,9 +182,10 @@ $(window).on('load', function() {
                 //TODO: controllare che succede se non è loggato
 
                 chrome.storage.local.set({email: email}, () => {
-                    
+
                     //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
                     chrome.storage.local.get("registeredPC", (response) => {
+                        console.log('REGISTERED: ' + !response.registeredPC)
                         if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
                         {  
                             chrome.runtime.sendMessage({

@@ -5,19 +5,19 @@ importScripts('/firebase/firebase-firestore-compat.js');
 try {
 
     const firebaseConfig = {
-        apiKey: "AIzaSyC9be1y9aJp_FgZt_r1cbInYn0At5RjuSc",
-        authDomain: "ifttt-7d462.firebaseapp.com",
-        databaseURL: "https://ifttt-7d462-default-rtdb.firebaseio.com/",
-        projectId: "ifttt-7d462",
-        storageBucket: "ifttt-7d462.appspot.com",
-        messagingSenderId: "1015752439290",
-        appId: "1:1015752439290:web:5e5c8dc3628dde68672043",
-        measurementId: "G-PQWGJ3V3WN"
+        apiKey: "AIzaSyD5ZjO3pHjgSTgcvL-EjKxnKnyMKAsDVBA",
+        authDomain: "ifttt-cac67.firebaseapp.com",
+        projectId: "ifttt-cac67",
+        storageBucket: "ifttt-cac67.appspot.com",
+        messagingSenderId: "432467263119",
+        appId: "1:432467263119:web:104e5475be74666ae4bafa",
+        measurementId: "G-KJ1C6BFH2K"
     };
 
     // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    var db = app.firestore();
+    /*const app = */
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
 
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
@@ -54,10 +54,15 @@ try {
         }
 
         else if(request.action === "saveRule") {
-            saveRule(email, request.title, request.trigger, request.action)
+
+            let title = JSON.stringify(request.jsonOutput[MAP_KEY_TITLE]);
+            let trigger = JSON.stringify(request.jsonOutput[MAP_KEY_TRIGGER])
+            let action = JSON.stringify(request.jsonOutput[MAP_KEY_ACTION])
+
+            saveRule(request.email, title, trigger, action)
             return true;
         }
-
+        
         else if(request.action === "saveRuleCounter") {
             saveRuleCounter(request.email, request.acceptedRuleCounter, request.rejectedRuleCounter);
             return true;
@@ -65,12 +70,14 @@ try {
 
         else if(request.action === "registerPC") {
 
+            console.log('REGISTER PC START')
             db.collection(request.email)
+              .doc("rules")
               .get()
-              .then((snapshot) => {
-                if(snapshot.exists) { //L'email esiste
+              .then((doc) => {
+                if(doc.exists) { //L'email esiste
                     //Scrivo i dati dal DB in locale
-                    const ruleData = snapshot.data().rules;
+                    const ruleData = doc.data();
                     const acceptedRuleCounter = ruleData.accepted;
                     const rejectedRuleCounter = ruleData.rejected;
 
@@ -78,10 +85,13 @@ try {
                         acceptedRuleCounter: acceptedRuleCounter,
                         rejectedRuleCounter: rejectedRuleCounter
                     })
-                }
 
+                    console.log('REGISTER SNAPSHOT EXISTS')
+                }
+                console.log('REGISTER SNAPSHOT CHECK END')
             })
             chrome.storage.local.set({registeredPC: true});
+            console.log('REGISTER PC END')
             return true;
         }
     });
@@ -91,9 +101,10 @@ try {
 
 function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 {
+    console.log('[SAVERULECOUNTER] email: ' + email + " | accepted: " + acceptedRuleCounter + " | rejected: " + rejectedRuleCounter)
     db.collection(email)
       .doc("rules")
-      .update({
+      .set({
         accepted: acceptedRuleCounter,  
         rejected: rejectedRuleCounter
       })
@@ -101,12 +112,14 @@ function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 
 function saveRule(email, title, trigger, action)
 {
+    console.log('[SAVERULE] title: ' + title + " | trigger: " + trigger + " | " + action + " | email: " + email);
     chrome.storage.local.get(['acceptedRuleCounter', 'rejectedRuleCounter'], (response) => {
-        let newRuleId = (response.acceptedRuleCounter)+1;
+        let newRuleId = (response.acceptedRuleCounter || 0)+1;
 
+        console.log("regola"+newRuleId)
         db.collection(email)
           .doc("regola"+newRuleId)
-          .update({
+          .set({
             title: title,
             trigger: trigger,
             action: action
@@ -114,7 +127,7 @@ function saveRule(email, title, trigger, action)
 
         chrome.storage.local.set({acceptedRuleCounter: newRuleId})
 
-        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter)
+        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter || 0)
     })
 }
 
@@ -147,3 +160,7 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
         }
     });
 });
+
+const MAP_KEY_TRIGGER = "trigger"
+const MAP_KEY_ACTION = "action"
+const MAP_KEY_TITLE = "title"
