@@ -48,12 +48,12 @@ body {
 #rule-details {
     height: 0px;
     border-radius: 1rem;
-    transition: height 0.5s, opacity 0.5s;
+    /*transition: height 0.5s, opacity 0.5s;*/
 }
 
 #rule-details-text {
     opacity: 0;
-    transition: opacity 0.5s;
+    /*transition: opacity 0.5s;*/
 }
 
 .expanded {
@@ -61,7 +61,7 @@ body {
 }
 
 .visible {
-    opacity: 1;
+    opacity: 1!important;
 }
 
 .rotate-360 {

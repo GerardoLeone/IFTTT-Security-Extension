@@ -67,31 +67,41 @@ btnPower.click(function () {
 /*
     Funzionalità bottone "Perchè?"
 */
-let btnDetails = $("#btn-details")
+let btnDetails = $("#btn-details");
+let ruleDetails = $("#rule-details");
+let ruleDetailsText = $("#rule-details-text");
+let animationDuration = 500; // Durata dell'animazione in millisecondi
 btnDetails.click(function() {
-    //TODO Completare
-    let ruleDetails = $("#rule-details");
     let height = ruleDetails.height();
-    let animationDuration = 500; // Durata dell'animazione in millisecondi
 
     if (height === 0) {
         // Non è espanso, esegui l'animazione per espandere il div
-        ruleDetails.animate({ height: ruleDetails[0].scrollHeight }, animationDuration, function() {
-            ruleDetails.height("auto");
-            btnDetails.text("Mostra meno");
-            $("#rule-details-text").addClass("visible");
+        ruleDetails.show(); // Mostra il div
+        let autoHeight = ruleDetailsText.height(); // Altezza dinamica del contenuto
+        ruleDetails.height(0); // Imposta l'altezza iniziale a 0
+
+        chrome.storage.local.get('serverResponse', (response) => {
+            let serverResponse = response.serverResponse;
+            ruleDetails.animate({ height: autoHeight }, animationDuration, function () {
+                // L'animazione è stata completata
+                ruleDetails.height("auto"); // Imposta l'altezza su "auto" dopo l'animazione
+                btnDetails.text("Mostra meno");
+                ruleDetailsText.addClass("visible");
+                ruleDetailsText.text(serverResponse);
+            });
         });
-    } 
-    else
-    {
+    } else {
         // È espanso, esegui l'animazione per contrarre il div
-        ruleDetails.animate({ height: 0 }, animationDuration, function() {
-            btnDetails.text("Perchè?");
-            $("#rule-details-text").removeClass("visible");
+        ruleDetails.animate({ height: 0 }, animationDuration, function () {
+            // L'animazione è stata completata
+            ruleDetails.hide(); // Nascondi il div
+            btnDetails.text("Perché?");
+            ruleDetailsText.removeClass("visible");
+            ruleDetailsText.text("");
         });
     }
+});
 
-})
 
 //Funzione per aggiornare estetica bottone
 function updateBtnPowerStatus(status)

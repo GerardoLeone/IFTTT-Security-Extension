@@ -15,7 +15,6 @@ try {
     };
 
     // Initialize Firebase
-    /*const app = */
     firebase.initializeApp(firebaseConfig);
     var db = firebase.firestore();
 
@@ -43,8 +42,6 @@ try {
             });
 
         }
-        else if(request.action === 'resetServerResponse') //Resetta il serverResponse (vedi content.js)
-            chrome.storage.local.set({ serverResponse : "" })
 
         else if(request.action === "isBtnStatusOn") { //Modifica lo status del bottone
             chrome.storage.local.get("status", (response) => {
@@ -102,11 +99,14 @@ try {
 function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 {
     console.log('[SAVERULECOUNTER] email: ' + email + " | accepted: " + acceptedRuleCounter + " | rejected: " + rejectedRuleCounter)
+    let accepted = acceptedRuleCounter || 0;
+    let rejected = rejectedRuleCounter || 0;
+
     db.collection(email)
       .doc("rules")
       .set({
-        accepted: acceptedRuleCounter,  
-        rejected: rejectedRuleCounter
+        accepted: accepted,  
+        rejected: rejected
       })
 }
 
@@ -121,13 +121,13 @@ function saveRule(email, title, trigger, action)
           .doc("regola"+newRuleId)
           .set({
             title: title,
-            trigger: trigger,
-            action: action
+            trigger: trigger || "Empty",
+            action: action || "Empty"
           })
 
         chrome.storage.local.set({acceptedRuleCounter: newRuleId})
 
-        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter || 0)
+        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter)
     })
 }
 

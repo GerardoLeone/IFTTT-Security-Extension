@@ -8,7 +8,8 @@
   ],
   "host_permissions": [
     "*://ifttt.com/*",
-    "*://developer.chrome.com/*"
+    "*://developer.chrome.com/*",
+    "http://localhost:3000/error"
   ],
   "action": {
     "default_popup": "main-background.html",

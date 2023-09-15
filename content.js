@@ -9,7 +9,7 @@ $(window).on('load', function() {
     console.log(url)
     if(url === URL_CREATION)
     {
-        chrome.runtime.sendMessage({ action: 'resetServerResponse' }); //al primo caricamento della pagina, resetto il messaggio sulla sicurezza
+        chrome.storage.local.set({ serverResponse : "" }) //al primo caricamento della pagina, resetto il messaggio sulla sicurezza
         chrome.runtime.sendMessage({ action: 'isBtnStatusOn'}, function(response) {
             let btnStatus = response
             console.log("status: "+ btnStatus)
@@ -93,7 +93,7 @@ $(window).on('load', function() {
                     console.log(jsonOutput)
 
                     //Va a buon fine
-                    chrome.storage.local.get("email", (response) => {
+                    /*chrome.storage.local.get("email", (response) => {
                         let email = response.email
                         console.log('[ADDRULE] email: ' + email)
                         chrome.runtime.sendMessage({
@@ -101,23 +101,28 @@ $(window).on('load', function() {
                             email: email,
                             jsonOutput: jsonOutput
                         })
-                    })
+                    })*/
 
 //=====================================================================================================================================================
 
-                    /*$.ajax({
-                        url: 'external-server-url',
-                        type: 'POST',
-                        data: JSON.stringify(jsonOutput), //Converto l'oggetto JSON in una stringa JSON
-                        success: function(response) {
-                            // La risposta dal server è stata ricevuta con successo
-                            console.log(response);
-                        },
-                        error: function(error) {
-                            // Si è verificato un errore durante la richiesta
-                            console.log(error);
-                        }
-                    });*/
+                    fetch('http://localhost:3000/error')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Errore nella richiesta');
+                            }
+                            return response.text();
+                        })
+                        .then(data => {
+                            console.log(data); // Gestisci la risposta dal server
+                            chrome.runtime.sendMessage({ 
+                                action: 'notifySecurityProblem', 
+                                serverResponseMsg: data
+                            });
+                        })
+                        .catch(error => {
+                        console.error(error); // Gestisci gli errori della richiesta
+                    });
+
                     
                     //TODO: mando la richiesta al server:
                 
@@ -178,8 +183,6 @@ $(window).on('load', function() {
                 var email = propsObject.email;
 
                 console.log(email); // Stampa l'email nella console
-
-                //TODO: controllare che succede se non è loggato
 
                 chrome.storage.local.set({email: email}, () => {
 
