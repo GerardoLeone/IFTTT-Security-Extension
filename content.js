@@ -6,17 +6,18 @@
 $(window).on('load', function() {
 
     let url = window.location.href;
-    console.log(url)
+    
     if(url === URL_CREATION)
     {
         chrome.storage.local.set({ serverResponse : "" }) //al primo caricamento della pagina, resetto il messaggio sulla sicurezza
         chrome.runtime.sendMessage({ action: 'isBtnStatusOn'}, function(response) {
             let btnStatus = response
-            console.log("status: "+ btnStatus)
 
             pageTitle = "None";
 
             jsonOutput = {}
+            jsonOutput[MAP_KEY_TRIGGER] = {}
+            jsonOutput[MAP_KEY_ACTION] = {}
 
             if(btnStatus) //Se il bottone è acceso
             {
@@ -42,8 +43,7 @@ $(window).on('load', function() {
                             }
                         }
 
-                        if(pageTitle === PAGE_TITLE_REVIEW) { //TODO: Appena arrivo nella Review, devo effettuare la chiamata Ajax al server passando i parametri acquisiti dalla regola.
-                            //TODO: un altro modo per prendere parametri è sicuramente quello di selezionarli uno a uno (per esempio usare il selettore "input, textarea, selection" ecc..)
+                        if(pageTitle === PAGE_TITLE_REVIEW) {
     
                             $(document).on('DOMSubtreeModified', '.preview__cta___mwtgs button', function() {
     
@@ -70,32 +70,51 @@ $(window).on('load', function() {
                 $(document).on('click', 'form input[type="submit"][role="button"]', function() {
                     switch(pageTitle)
                     {
+                        //Fetch ingredient
                         case PAGE_TITLE_COMPLETE_TRIGGER_FIELDS:   
                         case PAGE_TITLE_EDIT_TRIGGER_FIELDS:
-                            jsonOutput[MAP_KEY_TRIGGER] = fetchInputs();
-                            console.log('MAP_KEY_TRIGGER:')
-                            console.log(jsonOutput)
+                            jsonOutput[MAP_KEY_TRIGGER][MAP_KEY_INGREDIENT] = fetchIngredient();
                         break;
 
                         case PAGE_TITLE_COMPLETE_ACTION_FIELDS:
                         case PAGE_TITLE_EDIT_ACTION_FIEDLS:
-                            jsonOutput[MAP_KEY_ACTION] = fetchInputs();
-                            console.log('MAP_KEY_ACTION:')
-                            console.log(jsonOutput)
+                            jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT] = fetchIngredient();
                         break;                 
                     }
                 })
+
+                //Fetch del channel, del title e della desc
+                // Aggiungi un gestore di eventi di clic agli elementi <li> con attributo role="listitem"
+                $(document).on('click', 'li[role="listitem"]', function(){
+                    if(pageTitle === PAGE_TITLE_CHOOSE_TRIGGER || pageTitle === PAGE_TITLE_CHOOSE_ACTION) {
+                        // Seleziona il primo e il secondo <span> all'interno dell'elemento <li> cliccato
+                        var titleElement = $(this).find('span:first');
+                        var descriptionElement = $(this).find('span:eq(1)');
+
+                        // Ottieni il testo dal primo e dal secondo <span>
+                        var title = titleElement.text();
+                        var description = descriptionElement.text();
+
+                        let mapKey;
+                        if(pageTitle === PAGE_TITLE_CHOOSE_TRIGGER)
+                            mapKey = MAP_KEY_TRIGGER;
+                        else if(pageTitle === PAGE_TITLE_CHOOSE_ACTION)
+                            mapKey = MAP_KEY_ACTION;
+
+                        jsonOutput[mapKey][MAP_KEY_CHANNEL] = fetchChannel();
+                        jsonOutput[mapKey][MAP_KEY_TITLE] = title;
+                        jsonOutput[mapKey][MAP_KEY_DESC] = description;
+                    }
+                });
 
                 $(document).on('click', '#btn-finish', function(){ //se clicco sul pulsante di fine, mando il json al server esterno
 
                     //Prendo alla fine il titolo
                     jsonOutput[MAP_KEY_TITLE] = $("div.growing-text-area div").text()
-                    console.log(jsonOutput)
 
-                    //Va a buon fine
+                    //SUCCESS
                     /*chrome.storage.local.get("email", (response) => {
                         let email = response.email
-                        console.log('[ADDRULE] email: ' + email)
                         chrome.runtime.sendMessage({
                             action: 'saveRule',
                             email: email,
@@ -105,6 +124,7 @@ $(window).on('load', function() {
 
 //=====================================================================================================================================================
 
+                    //FAILURE
                     fetch('http://localhost:3000/error')
                         .then(response => {
                             if (!response.ok) {
@@ -113,34 +133,20 @@ $(window).on('load', function() {
                             return response.text();
                         })
                         .then(data => {
-                            console.log(data); // Gestisci la risposta dal server
-                            chrome.runtime.sendMessage({ 
-                                action: 'notifySecurityProblem', 
-                                serverResponseMsg: data
+                            chrome.storage.local.get("email", (response) => {
+                                let email = response.email
+                                chrome.runtime.sendMessage({ 
+                                    action: 'notifySecurityProblem', 
+                                    serverResponseMsg: data,
+                                    email: email,
+                                    jsonOutput: jsonOutput
+                                });
                             });
                         })
                         .catch(error => {
                         console.error(error); // Gestisci gli errori della richiesta
                     });
 
-                    
-                    //TODO: mando la richiesta al server:
-                
-                    /*
-                    //Se la regola è sicura:
-                    
-                    $(".preview__cta___mwtgs button").click()
-                    
-                    */
-                    /*
-                    //Se la regola non è sicura (dunque il server mi passa una stringa con i problemi):
-            
-                    let serverResponse  = "Ci sono problemi in questa regola perchè i parametri non sono sicuri e dovresti risolvere.";
-                    chrome.runtime.sendMessage({ 
-                        action: 'notifySecurityProblem', 
-                        serverResponseMsg: serverResponse
-                    });
-                    */
                 })
             }
         })
@@ -182,13 +188,10 @@ $(window).on('load', function() {
                 // Estrai l'email dall'oggetto propsObject
                 var email = propsObject.email;
 
-                console.log(email); // Stampa l'email nella console
-
                 chrome.storage.local.set({email: email}, () => {
 
-                    //TODO: se registered è false, prendere i dati dal DB e portarli in locale, se registered è true, lavorare solo in locale
                     chrome.storage.local.get("registeredPC", (response) => {
-                        console.log('REGISTERED: ' + !response.registeredPC)
+                        
                         if(!response.registeredPC) //Se non è registrato, quindi è la prima volta che usa questo pc per questa estensione, deve caricare i dati (se l'email è registrata)
                         {  
                             chrome.runtime.sendMessage({
@@ -205,14 +208,31 @@ $(window).on('load', function() {
 
 
     }
-    /*else if(url === URL_LOGOUT) {
-        console.log('logout')   
-        chrome.storage.local.set({email: "", registeredPC: false, rejectedRuleCounter: 0, serverResponse: ""})
-    }*/
 
 });
 
-function fetchInputs()
+function fetchChannel()
+{
+    // Seleziona l'elemento <section> tramite una querySelector
+    var sectionElement = document.querySelector('.step_selector__brand___YQgU1');
+
+    // Verifica se l'elemento è stato trovato
+    if (sectionElement) {
+        // Seleziona l'elemento <h1> all'interno di <section>
+        var h1Element = sectionElement.querySelector('h1');
+
+        // Verifica se l'elemento <h1> è stato trovato
+        if (h1Element) {
+            // Ottieni il testo dall'elemento <h1>
+            var textH1 = h1Element.innerText;
+            return textH1;
+        }
+    }
+    return "Empty"
+}
+
+
+function fetchIngredient()
 {
     var jsonObj = {};
 
@@ -234,11 +254,10 @@ function fetchInputs()
 
         // Aggiungere il valore dell'input alla lista corrispondente nel JSON
         jsonObj[label] = inputValues;
-        //console.log('JSONOBJ: ')
-        //console.log(jsonObj)
     });
     return jsonObj;
 }
+
 
 const PAGE_TITLE_CREATE = "Create"
 const PAGE_TITLE_CHOOSE_SERVICE = "Choose a service"
@@ -256,6 +275,10 @@ const PAGE_TITLE_REVIEW = "Review and finish"
 const MAP_KEY_TRIGGER = "trigger"
 const MAP_KEY_ACTION = "action"
 const MAP_KEY_TITLE = "title"
+
+const MAP_KEY_CHANNEL = "channel"
+const MAP_KEY_DESC = "desc"
+const MAP_KEY_INGREDIENT = "ingredient"
 
 const URL_CREATION = "https://ifttt.com/create"
 const URL_EXPLORE = "https://ifttt.com/explore"

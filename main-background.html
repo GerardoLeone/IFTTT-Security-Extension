@@ -26,6 +26,10 @@
       </div>
     </div>
 
+    <div class="badge rounded-pill second-color mt-2" id="txt-email">
+      Nessuna email collegata
+    </div>
+
     <div class="text-color align-self-end">Feedback</div>
     <div class="divider"></div>
     
@@ -45,11 +49,16 @@
     <div class="text-color align-self-end">Statistiche</div>
     <div class="divider"></div>
     
-    <div class="d-flex flex-row justify-content-between" style="width: 100%;">
-        <div class="mt-2 mb-2 text-color">Regole rifiutate</div>
-        <div class="d-flex flex-row align-items-center">
-        <div class="text-color mr-1" id="rules-rejected-counter">0</div>
-        <img src="./icons/reset-ic.svg" id="btn-reset">
+    <div class="badge rounded-pill second-color d-flex flex-row justify-content-between mt-2 mb-2 ps-3 pe-3" style="width: 100%;">
+        
+        <div class="d-flex flex-row align-items-center" title="Regole accettate">
+          <img src="./icons/file-earmark-plus.svg" id="icon-accepted-rules" alt="accepted rules">
+          <div class="text-color" id="rules-accepted-counter" style="font-size: 20px;">0</div>
+        </div>
+
+        <div class="d-flex flex-row align-items-center" title="Regole rifiutate">
+          <div class="text-color" id="rules-rejected-counter" style="font-size: 20px;">0</div>
+          <img src="./icons/file-earmark-minus.svg" id="icon-rejected-rules" alt="rejected rules">
         </div>
     </div>
 

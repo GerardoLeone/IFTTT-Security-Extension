@@ -1,8 +1,16 @@
 $(window).on('load', function() {
-    updateRulesRejectedText()
+    updateRulesCounterText()
 
     //Reset rules details
     $("#rule-details").hide()
+
+    chrome.storage.local.get('email', (response) => {
+        let email = response.email;
+        if(!email)
+            $("#txt-email").text("Nessuna email collegata.")
+        else
+            $("#txt-email").text(email);
+    })
 })
 
 /*
@@ -121,48 +129,9 @@ function updateBtnPowerStatus(status)
 }
 
 /*
-    Funzionalità bottone di reset conteggio
-*/
-let btnResetRotating = false;
-let btnReset = $('#btn-reset')
-btnReset.click(function() {
-
-    if(!btnResetRotating) {
-        btnResetRotating = true;
-        
-        resetRulesRejected()
-
-        $(this).addClass('rotate-360');
-
-        setTimeout(() => {
-            $(this).css('transition', 'none')
-        }, 450);
-
-        setTimeout(() => {
-            $(this).removeClass('rotate-360')
-        }, 500);
-
-        setTimeout(() => {
-            $(this).css('transition', 'transform 0.5s')
-            btnResetRotating = false;
-        }, 550);
-    }
-})
-
-function resetRulesRejected()
-{
-    //Imposto il contatore delle regole rifiutate a 0 e salvo in locale
-    chrome.storage.local.set({ rejectedRuleCounter: 0 }, () => {
-        $("#rules-rejected-counter").text(0)
-    });
-
-    chrome.storage.local.set({registeredPC: false}) //TODO verificare se è corretto inserirlo qui
-}
-
-/*
     Funzionalità di caricamento estetica
 */
-function updateRulesRejectedText()
+function updateRulesCounterText()
 {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, tabs => {
         let url = tabs[0].url;
@@ -190,9 +159,11 @@ function updateRulesRejectedText()
     });
 
     //Aggiorno il counter
-    chrome.storage.local.get('rejectedRuleCounter', (response) => {
-        let counter = response.rejectedRuleCounter || 0;
-        $("#rules-rejected-counter").text(counter)
+    chrome.storage.local.get(['rejectedRuleCounter', 'acceptedRuleCounter'], (response) => {
+        let rejectedCounter = response.rejectedRuleCounter || 0;
+        let acceptedCounter = response.acceptedRuleCounter || 0;
+        $("#rules-rejected-counter").text(rejectedCounter)
+        $("#rules-accepted-counter").text(acceptedCounter)
     });
 
     //Aggiorno lo stato del bottone

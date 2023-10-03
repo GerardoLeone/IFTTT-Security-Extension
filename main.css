@@ -92,6 +92,29 @@ body {
     align-items: center;
 }
 
+.custom-tooltip:hover::before {
+    content: attr(title);
+    background-color: #333; /* Colore di sfondo del tooltip */
+    color: #fff; /* Colore del testo del tooltip */
+    padding: 5px; /* Spazio interno del tooltip */
+    position: absolute;
+    z-index: 1; /* Assicura che il tooltip sia sopra gli altri elementi */
+    border-radius: 5px; /* Bordo arrotondato */
+    font-size: 14px; /* Dimensione del testo del tooltip */
+}
+
+/* Stile specifico per il tooltip "accepted" */
+.accepted-tooltip:hover::before {
+    left: 100%; /* Posiziona il tooltip a destra del div */
+    top: 0; /* Posiziona il tooltip allineato con l'alto del div */
+}
+
+/* Stile specifico per il tooltip "rejected" */
+.rejected-tooltip:hover::before {
+    right: 100%; /* Posiziona il tooltip a sinistra del div */
+    top: 0; /* Posiziona il tooltip allineato con l'alto del div */
+}
+
 /*
     COLORS
 */
@@ -111,14 +134,18 @@ body {
     color: var(--fourth-color);
 }
 
+.text-color-red {
+    color: var(--third-color)
+}
+
 .success-color {
     color: var(--success-color);
 }
 
 :root {
 
-    --first-color: #233142;
-    --second-color: #455d7a;
+    --first-color: #1E1E2C;
+    --second-color: #2D2D44;
     --third-color: #f95959;
     --fourth-color: #e3e3e3;
 }

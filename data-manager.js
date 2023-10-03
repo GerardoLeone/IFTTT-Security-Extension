@@ -21,6 +21,16 @@ try {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
         if (request.action === 'notifySecurityProblem') {
+
+            //Caso in cui non ci sono ingredients
+            if(!request.jsonOutput[MAP_KEY_TRIGGER][MAP_KEY_INGREDIENT])
+                request.jsonOutput[MAP_KEY_TRIGGER][MAP_KEY_INGREDIENT] = "Empty"
+
+            if(!request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT])
+                request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT] = "Empty"
+
+            saveRule(request.email, request.jsonOutput)
+
             // Salva i dati ricevuti nell'archivio di storage locale
             chrome.storage.local.set({ serverResponse: request.serverResponseMsg }, () => {
                 chrome.storage.local.get('rejectedRuleCounter', (response) => {
@@ -52,11 +62,14 @@ try {
 
         else if(request.action === "saveRule") {
 
-            let title = JSON.stringify(request.jsonOutput[MAP_KEY_TITLE]);
-            let trigger = JSON.stringify(request.jsonOutput[MAP_KEY_TRIGGER])
-            let action = JSON.stringify(request.jsonOutput[MAP_KEY_ACTION])
+            //Caso in cui non ci sono ingredients
+            if(!request.jsonOutput[MAP_KEY_TRIGGER][MAP_KEY_INGREDIENT])
+                request.jsonOutput[MAP_KEY_TRIGGER][MAP_KEY_INGREDIENT] = "Empty"
 
-            saveRule(request.email, title, trigger, action)
+            if(!request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT])
+                request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT] = "Empty"
+
+            saveRule(request.email, request.jsonOutput)
             return true;
         }
         
@@ -67,7 +80,6 @@ try {
 
         else if(request.action === "registerPC") {
 
-            console.log('REGISTER PC START')
             db.collection(request.email)
               .doc("rules")
               .get()
@@ -83,12 +95,9 @@ try {
                         rejectedRuleCounter: rejectedRuleCounter
                     })
 
-                    console.log('REGISTER SNAPSHOT EXISTS')
                 }
-                console.log('REGISTER SNAPSHOT CHECK END')
             })
             chrome.storage.local.set({registeredPC: true});
-            console.log('REGISTER PC END')
             return true;
         }
     });
@@ -98,7 +107,6 @@ try {
 
 function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 {
-    console.log('[SAVERULECOUNTER] email: ' + email + " | accepted: " + acceptedRuleCounter + " | rejected: " + rejectedRuleCounter)
     let accepted = acceptedRuleCounter || 0;
     let rejected = rejectedRuleCounter || 0;
 
@@ -110,20 +118,14 @@ function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
       })
 }
 
-function saveRule(email, title, trigger, action)
+function saveRule(email, json)
 {
-    console.log('[SAVERULE] title: ' + title + " | trigger: " + trigger + " | " + action + " | email: " + email);
     chrome.storage.local.get(['acceptedRuleCounter', 'rejectedRuleCounter'], (response) => {
         let newRuleId = (response.acceptedRuleCounter || 0)+1;
 
-        console.log("regola"+newRuleId)
         db.collection(email)
           .doc("regola"+newRuleId)
-          .set({
-            title: title,
-            trigger: trigger || "Empty",
-            action: action || "Empty"
-          })
+          .set(json)
 
         chrome.storage.local.set({acceptedRuleCounter: newRuleId})
 
@@ -135,14 +137,13 @@ function saveRule(email, title, trigger, action)
     Quando si chiudono tutte le schede (chiusura browser o manuale) deve salvare i dati nel DB
 */
 chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
-    console.log('[ONREMOVED DEBUG] ENTRO')
+    
     chrome.storage.local.get('status', (response) => {
         if (chrome.runtime.lastError) {
             console.error('[ONREMOVED ERROR] Errore nell\'accesso ai dati di stato: ' + chrome.runtime.lastError);
             return;
         }
         
-        console.log('[ONREMOVED DEBUG] STATUS: ' + response.status)
         if (response.status) { // Se è ON
             chrome.tabs.query({ url: "https://ifttt.com/*" }, function(tabs) {
                 if (chrome.runtime.lastError) {
@@ -150,7 +151,6 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
                     return;
                 }
                 
-                console.log('[ONREMOVED DEBUG] LENGTH: ' + tabs.length)
                 if (tabs.length === 0) {
                     chrome.storage.local.get(['email', 'acceptedRuleCounter', 'rejectedRuleCounter'], function(result) {
                         saveRuleCounter(result.email, result.acceptedRuleCounter, result.rejectedRuleCounter);
@@ -164,3 +164,7 @@ chrome.tabs.onRemoved.addListener(function(tabId, removeInfo) {
 const MAP_KEY_TRIGGER = "trigger"
 const MAP_KEY_ACTION = "action"
 const MAP_KEY_TITLE = "title"
+
+const MAP_KEY_CHANNEL = "channel"
+const MAP_KEY_DESC = "desc"
+const MAP_KEY_INGREDIENT = "ingredient"
