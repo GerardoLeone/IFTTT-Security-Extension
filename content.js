@@ -112,6 +112,8 @@ $(window).on('load', function() {
                     //Prendo alla fine il titolo
                     jsonOutput[MAP_KEY_TITLE] = $("div.growing-text-area div").text()
 
+//=====================================================================================================================================================
+
                     //SUCCESS
                     /*chrome.storage.local.get("email", (response) => {
                         let email = response.email
@@ -146,6 +148,8 @@ $(window).on('load', function() {
                         .catch(error => {
                         console.error(error); // Gestisci gli errori della richiesta
                     });
+
+//=====================================================================================================================================================
 
                 })
             }
