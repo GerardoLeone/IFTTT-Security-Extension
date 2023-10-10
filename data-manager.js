@@ -33,7 +33,7 @@ try {
 
             // Salva i dati ricevuti nell'archivio di storage locale
             chrome.storage.local.set({ serverResponse: request.serverResponseMsg }, () => {
-                chrome.storage.local.get('rejectedRuleCounter', (response) => {
+                chrome.storage.local.get(['rejectedRuleCounter', 'acceptedRuleCounter'], (response) => {
                 
                     let counter = response.rejectedRuleCounter || 0;
                     counter++;
@@ -46,6 +46,8 @@ try {
                             title: "Attenzione!",
                             message: "È stato rilevato un problema di sicurezza nella tua regola, pertanto ne è stata impedita la creazione.",
                         }, () => {})
+
+                        saveRuleCounter(request.email, response.acceptedRuleCounter, counter);
 
                     });
                 });
@@ -68,8 +70,18 @@ try {
 
             if(!request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT])
                 request.jsonOutput[MAP_KEY_ACTION][MAP_KEY_INGREDIENT] = "Empty"
-
+            
             saveRule(request.email, request.jsonOutput)
+
+            chrome.storage.local.get(['rejectedRuleCounter', 'acceptedRuleCounter'], (response) => {
+            
+                let counter = response.acceptedRuleCounter || 0;
+                counter++;
+            
+                chrome.storage.local.set({ acceptedRuleCounter: counter }, () => {
+                    saveRuleCounter(request.email, counter, response.rejectedRuleCounter);
+                });
+            });
             return true;
         }
         
@@ -121,15 +133,11 @@ function saveRuleCounter(email, acceptedRuleCounter, rejectedRuleCounter)
 function saveRule(email, json)
 {
     chrome.storage.local.get(['acceptedRuleCounter', 'rejectedRuleCounter'], (response) => {
-        let newRuleId = (response.acceptedRuleCounter || 0)+1;
+        let newRuleId = (response.acceptedRuleCounter || 0)+(response.rejectedRuleCounter || 0)+1;
 
         db.collection(email)
           .doc("regola"+newRuleId)
           .set(json)
-
-        chrome.storage.local.set({acceptedRuleCounter: newRuleId})
-
-        saveRuleCounter(email, newRuleId, response.rejectedRuleCounter)
     })
 }
 
