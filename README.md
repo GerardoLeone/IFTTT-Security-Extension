@@ -8,7 +8,7 @@ Questo progetto ha avuto inizio come parte del mio tirocinio interno all'Univers
 
 Durante il tirocinio, ho avuto l'opportunità di mettere in pratica le nozioni apprese durante il corso di studi, un'esperienza che ha plasmato e ispirato gran parte di questo progetto. La tesi di laurea è il punto culminante di questo percorso, focalizzandosi su aspetti specifici nel campo dell'analisi dei rischi di sicurezza e privacy nell'ecosistema IFTTT.
 
-Il progetto, sviluppato in collaborazione con Giovanni Battista Mercurio e sotto la supervisione di Gaetano Cimino e Bernardo breve, consiste in un'estensione chromium based che fornisce una maggior attenzione sulla privacy e sicurezza degli utenti che interagiscono su sistemi IoT basati su paradigma Trigger-Action. 
+Il progetto, sviluppato in collaborazione con Giovanni Mercurio e sotto la supervisione del Dr. Gaetano Cimino e Dr. Bernardo breve, consiste in un'estensione chromium based che fornisce una maggior attenzione sulla privacy e sicurezza degli utenti che interagiscono su sistemi IoT basati su paradigma Trigger-Action. 
 
 ## Cosa si intende per IoT?
 
@@ -194,3 +194,16 @@ Per quanto riguarda gli sviluppi futuri e quindi come migliorare la nostra soluz
 ## Altri sviluppi possibili
 
 ![image](https://github.com/GerardoLeone/IFTTT-Security-Extension/assets/61288148/561acf4f-5f9a-4c9a-a8ca-e735f0736e25)
+
+# Author
+- Gerardo Leone
+- Giovanni Mercurio
+
+# Tutor
+- Dr. Bernardo Breve
+- Dr. Gaetano Cimino
+
+# Università
+![image](https://github.com/GerardoLeone/IFTTT-Security-Extension/assets/61288148/b3a5eb6a-d4ca-4617-9ca2-d8a3c6ca81ec)
+
+Università degli Studi di Salerno (UNISA) - Informatica
